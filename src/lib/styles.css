@@ -1,0 +1,75 @@
+.steps {
+  display: flex;
+  flex-direction: column;
+  background-color: #fff;
+  font-family: sans-serif;
+}
+
+.steps__progress {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.steps__progress button {
+  display: inline-block;
+  border: none;
+  border-radius: 8px;
+  height: 0.25rem;
+  cursor: pointer;
+  flex: 1;
+}
+
+.steps__title {
+  margin-bottom: 1rem;
+}
+
+.steps__body {
+  flex: 1;
+}
+
+.steps__body > * {
+  animation-name: fadeIn;
+  animation-duration: 0.5s;
+}
+
+.steps__nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.5rem;
+}
+
+.steps__navBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0.4rem;
+  border-radius: 100%;
+  border: none;
+  cursor: pointer;
+}
+
+.steps__navBtn svg {
+  width: 100%;
+}
+
+.steps__navBtn--next {
+  margin-left: auto;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-2rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+
