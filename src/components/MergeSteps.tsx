@@ -1,6 +1,6 @@
 import React, { useState, useMemo, Children, cloneElement, ReactElement } from "react"
-import { RenderProps, StepsProps } from "./types"
-import { isFunction } from "./utils"
+import { RenderProps, StepsProps } from "../types"
+import { isFunction } from "../utils"
 
 export function MergeSteps({
    children,

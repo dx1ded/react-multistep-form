@@ -1,7 +1,6 @@
 import React, { useState, useRef, Children, cloneElement, ReactElement} from "react"
-import { RenderProps, StepsProps, StepMiddleware } from "./types"
-import { isFunction } from "./utils"
-
+import { RenderProps, StepsProps, StepMiddleware } from "../types"
+import { isFunction } from "../utils"
 export function Steps({
   children,
   onSubmit,
