@@ -1,17 +1,18 @@
-.steps {
+.steps,
+.merged-steps {
   display: flex;
   flex-direction: column;
   background-color: #fff;
   font-family: sans-serif;
 }
 
-.steps__progress {
+.steps-progress {
   display: flex;
   gap: 1rem;
   margin-bottom: 2rem;
 }
 
-.steps__progress button {
+.steps-progress button {
   display: inline-block;
   border: none;
   border-radius: 8px;
