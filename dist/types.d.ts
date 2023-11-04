@@ -1,9 +1,9 @@
 import React, { ReactElement } from "react";
-export type RenderProps = {
+export type RenderProps<T> = {
     /**
      * Data object with all data you've passed in from different stages
      */
-    data: object;
+    data: T;
     /**
      * A function to save some data
      */
@@ -21,7 +21,7 @@ export type RenderProps = {
      */
     setNextStep(): void;
 };
-export type StepProps = RenderProps & {
+export type StepProps<U> = RenderProps<U> & {
     /**
      * Step title which will be shown on the top
      */
@@ -45,15 +45,20 @@ export type StepMiddleware = {
      * In order to proceed to the next step the function should return true (or false if shouldn't)
      * @param args
      */
-    fn: (...args: any[]) => boolean;
+    prev?(): boolean;
+    next?(): boolean;
 };
 export type StepsProps = {
-    children: ((props: RenderProps) => ReactElement) | ReactElement | ReactElement[];
+    children: ((props: RenderProps<any>) => ReactElement) | ReactElement | ReactElement[];
     /**
      * A function will be invoked once the last step is passed
      * @param data
      */
-    onSubmit?(data: object): void;
+    onSubmit?(data: unknown): void;
+    /**
+     * Data object which will be stored in state
+     */
+    data?: unknown;
     /**
      * Progress bar.
      * However, if the Steps component is merged (using MergeSteps) - it won't work for this component
@@ -77,9 +82,11 @@ export type StepsProps = {
      */
     navigationColor?: string;
     item?: number;
-    defaultStep?: number;
-    defaultData?: object;
-    defaultSetPrevStep?(): void;
-    defaultSetNextStep?(): void;
-    defaultSetData?: React.Dispatch<React.SetStateAction<object>>;
+    mergedStep?: number;
+    mergedStore?: object;
+    mergedSetStore?: React.Dispatch<React.SetStateAction<object>>;
+    mergedButtonsDisabled?: boolean;
+    mergedSetButtonsDisabled?: React.Dispatch<React.SetStateAction<boolean>>;
+    mergedSetPrevStep?(): void;
+    mergedSetNextStep?(): void;
 };

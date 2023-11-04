@@ -1,9 +1,10 @@
-import React, { useState, useMemo, Children, cloneElement, ReactElement } from "react"
-import { RenderProps, StepsProps } from "../types"
-import { isFunction } from "../utils"
+import { useState, useMemo, Children, cloneElement, ReactElement } from "react"
+import { RenderProps, StepsProps } from "./types"
+import { isFunction } from "./utils"
 
 export function MergeSteps({
    children,
+   data = {},
    onSubmit,
    hasProgress = true,
    hasNavigation,
@@ -14,16 +15,16 @@ export function MergeSteps({
   const [stage, setStage] = useState<number>(0)
   const [step, setStep] = useState<number>(0)
   const [item, setItem] = useState<number>(0)
-  const [data, setData] = useState<object>({})
+  const [buttonsDisabled, setButtonsDisabled] = useState<boolean>(false)
+  const [store, setStore] = useState<typeof data>(data)
 
-  const invokedChildren = Children.toArray(
+  const invokedChildren = useMemo(() => Children.toArray(
     isFunction(children)
-      ? children({
-          data,
-          setData
-        } as RenderProps).props.children
+      ? children({} as RenderProps<typeof store>).props.children
       : children
-  ) as ReactElement[]
+    ) as ReactElement[],
+    [children]
+  )
 
   const ranges = useMemo(
     () =>
@@ -37,7 +38,7 @@ export function MergeSteps({
         ),
         []
       ),
-    [children]
+    [invokedChildren]
   )
 
   const stagesList = useMemo(
@@ -49,11 +50,11 @@ export function MergeSteps({
         ),
         []
       ),
-    [ranges, children]
+    [invokedChildren, ranges]
   )
 
   const changeStep = (index: number): void => {
-    if (index === ranges[ranges.length - 1]) return onSubmit!(data)
+    if (index === ranges[ranges.length - 1] && onSubmit) return onSubmit(store)
 
     const stage = ranges.findIndex((i) => i > index)
     const step = stagesList.flat()[index]
@@ -68,8 +69,8 @@ export function MergeSteps({
       <div className="steps-progress">
         {hasProgress && stagesList
           .reduce(
-            (acc: any[], stages, i) => (
-              i <= stage ? acc.push(...stages) : acc.push([]), acc
+            (acc: number[], stages, i) => (
+              i <= stage ? acc.push(...stages) : acc.push(0), acc
             ),
             []
           )
@@ -94,11 +95,13 @@ export function MergeSteps({
         progressColor,
         navigationColor,
         item,
-        defaultStep: step,
-        defaultData: data,
-        defaultSetPrevStep: () => changeStep(item - 1),
-        defaultSetNextStep: () => changeStep(item + 1),
-        defaultSetData: setData
+        mergedStep: step,
+        mergedStore: store,
+        mergedSetStore: setStore,
+        mergedButtonsDisabled: buttonsDisabled,
+        mergedSetButtonsDisabled: setButtonsDisabled,
+        mergedSetPrevStep: () => changeStep(item - 1),
+        mergedSetNextStep: () => changeStep(item + 1)
       } as StepsProps)}
     </div>
   )

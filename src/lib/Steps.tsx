@@ -1,8 +1,9 @@
-import React, { useState, useRef, Children, cloneElement, ReactElement} from "react"
-import { RenderProps, StepsProps, StepMiddleware } from "../types"
-import { isFunction } from "../utils"
+import { useState, useCallback, useMemo, useRef, Children, cloneElement, ReactElement } from "react"
+import { RenderProps, StepsProps, StepMiddleware } from "./types"
+import { isFunction } from "./utils"
 export function Steps({
   children,
+  data = {},
   onSubmit,
   hasProgress = true,
   hasNavigation,
@@ -11,48 +12,64 @@ export function Steps({
   navigationColor = "#fff",
   // Merged steps props
   item,
-  defaultStep,
-  defaultData,
-  defaultSetPrevStep,
-  defaultSetNextStep,
-  defaultSetData
+  mergedStep,
+  mergedStore,
+  mergedSetStore,
+  mergedButtonsDisabled,
+  mergedSetButtonsDisabled,
+  mergedSetPrevStep,
+  mergedSetNextStep
 }: StepsProps) {
   const [step, setStep] = useState<number>(0)
-  const [data, setData] = useState<object>({})
+  const [store, setStore] = useState<typeof data>(data)
   const [buttonsDisabled, setButtonsDisabled] = useState<boolean>(false)
   const middleware = useRef<StepMiddleware>(null)
 
-  let setPrevStep = () => {}
-  let setNextStep = () => {}
+  // This thing is invoked because we need children.length for setNextStep()
+  const _childrenList = useMemo(() => Children.toArray(
+    isFunction(children) ? children({} as RenderProps<typeof data>).props.children : children
+  ), [children])
 
-  const invokedChildren = Children.toArray(
-   isFunction(children)
+  const setPrevStep = useCallback(() => {
+    const m = middleware.current
+    const fn = mergedSetPrevStep
+      ? (() => m && m.prev && !m.prev() && mergedSetPrevStep())
+      : (() => {
+          if (m && m.prev && !m.prev()) return
+          setStep((prev) => prev - 1)
+        })
+
+    fn()
+  }, [mergedSetPrevStep])
+
+  const setNextStep = useCallback(() => {
+    const m = middleware.current
+    const fn = mergedSetNextStep
+      ? (() => m && m.next && !m.next() && mergedSetNextStep())
+      : (() => {
+        if (m && m.next && !m.next()) return
+        if (step === _childrenList.length - 1 && onSubmit) return onSubmit(store)
+        setStep((prev) => prev + 1)
+      })
+
+    fn()
+  }, [_childrenList.length, mergedSetNextStep, onSubmit, step, store])
+
+  const invokedChildren = useMemo(() => Children.toArray(
+    isFunction(children)
       ? children({
-          data: defaultData || data,
-          setData: defaultSetData || setData,
-          setButtonsDisabled,
+          data: mergedStore || store,
+          setData: mergedSetStore || setStore,
+          setButtonsDisabled: mergedSetButtonsDisabled || setButtonsDisabled,
           setPrevStep,
           setNextStep
-        } as RenderProps).props.children
+        } as RenderProps<typeof data>).props.children
       : children
-  ) as ReactElement[]
+    ) as ReactElement[],
+    [children, mergedStore, mergedSetStore, store, setPrevStep, setNextStep]
+  )
 
-  setPrevStep = defaultSetPrevStep
-    ? (() => defaultSetPrevStep())
-    : (() => setStep((prev) => prev - 1))
-
-  setNextStep = defaultSetNextStep
-    ? (() => {
-      if (middleware.current && !middleware.current.fn()) return
-      defaultSetNextStep()
-    })
-    : (() => {
-      if (middleware.current && !middleware.current.fn()) return
-      if (step === invokedChildren.length - 1) return onSubmit!(data)
-      setStep((prev) => prev + 1)
-    })
-
-  const currentElement = invokedChildren[defaultStep ?? step]
+  const currentElement = invokedChildren[mergedStep ?? step]
 
   const withProgress = currentElement.props.noProgress ? false : hasProgress
   const withNavigation = currentElement.props.noNavigation ? false : hasNavigation
@@ -67,7 +84,7 @@ export function Steps({
               key={i}
               style={{ backgroundColor: i <= step ? primaryColor : progressColor }}
               aria-label={`Step ${i + 1}`}
-              disabled={i > step}
+              disabled={i > step || mergedButtonsDisabled || buttonsDisabled}
               onClick={() => setStep(i)}
             />
           ))}
@@ -88,7 +105,7 @@ export function Steps({
               className="steps__navBtn steps__navBtn--prev"
               style={{ backgroundColor: primaryColor }}
               aria-label="Previous step"
-              disabled={buttonsDisabled}
+              disabled={mergedButtonsDisabled || buttonsDisabled}
               onClick={setPrevStep}
             >
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50" width="50px" height="50px" fill={navigationColor}>
