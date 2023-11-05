@@ -1,7 +1,7 @@
 {
   "name": "@dx1ded/react-multistep-form",
   "description": "React Multistep Form Library",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -36,7 +36,7 @@
     "ts",
     "ui"
   ],
-  "reposity": {
+  "repository": {
     "type": "git",
     "url" : "git+https://github.com/dx1ded/react-multistep-form.git"
   },
