@@ -2,7 +2,7 @@
 
 > Easy to use Multi-step form component
 
-![example picture](https://imgur.com/l0Y44A7) 
+![example picture](https://raw.githubusercontent.com/dx1ded/react-multistep-form/main/src/images/example.png) 
 
 
 ## Installation
@@ -23,7 +23,7 @@ Basically you're provided with two components:
 * **MergeSteps** - the component merges other steps components
 
 ## Examples
-You can find examples in the reposity:  
+You can find examples in the repository:  
 [Examples](https://github.com/dx1ded/react-multistep-form/tree/main/src/examples)
 
 ## Options

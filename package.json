@@ -1,7 +1,6 @@
 {
-  "name": "react-multistep-form",
-  "private": true,
-  "version": "0.0.0",
+  "name": "@dx1ded/react-multistep-form",
+  "version": "0.0.3",
   "type": "module",
   "scripts": {
     "dev": "vite",
