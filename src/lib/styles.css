@@ -53,6 +53,10 @@
   cursor: pointer;
 }
 
+.steps__navBtn[disabled] {
+  opacity: 0.7;
+}
+
 .steps__navBtn svg {
   width: 100%;
 }

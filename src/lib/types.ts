@@ -16,11 +16,11 @@ export type RenderProps<T> = {
   /**
    * Set the previous step
    */
-  setPrevStep(): void,
+  setPrevStep(pages?: number): void,
   /**
    * Set the next step
    */
-  setNextStep(): void
+  setNextStep(pages?: number): void
 }
 
 export type StepProps<U> = RenderProps<U> & {
@@ -44,12 +44,16 @@ export type StepProps<U> = RenderProps<U> & {
 
 export type StepMiddleware = {
   /**
-   * A function which will be invoked as a middleware.
-   * In order to proceed to the next step the function should return true (or false if shouldn't)
-   * @param args
+   * functions which will be invoked as a middleware.
+   * In order to proceed to the prev / next step the function should return true (or false if shouldn't)
+   * Prev is for "going prev" and next is for "going next"
+   * @param setPrevStep
    */
-  prev?(): boolean,
-  next?(): boolean
+  prev?(setPrevStep: (pages?: number) => void): boolean,
+  /**
+   * @param setNextStep
+   */
+  next?(setNextStep: (pages?: number) => void): boolean
 }
 
 export type StepsProps = {
@@ -88,10 +92,7 @@ export type StepsProps = {
   // For merged steps
   item?: number,
   mergedStep?: number,
-  mergedStore?: object,
-  mergedSetStore?: React.Dispatch<React.SetStateAction<object>>,
   mergedButtonsDisabled?: boolean,
-  mergedSetButtonsDisabled?: React.Dispatch<React.SetStateAction<boolean>>,
-  mergedSetPrevStep?(): void,
-  mergedSetNextStep?(): void
+  mergedSetPrevStep?(pages?: number): void,
+  mergedSetNextStep?(pages?: number): void
 }

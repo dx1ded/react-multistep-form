@@ -1,4 +1,4 @@
-import { useState, useMemo, Children, cloneElement, ReactElement } from "react"
+import {useState, useMemo, Children, cloneElement, ReactElement, useCallback} from "react"
 import { RenderProps, StepsProps } from "./types"
 import { isFunction } from "./utils"
 
@@ -18,17 +18,16 @@ export function MergeSteps({
   const [buttonsDisabled, setButtonsDisabled] = useState<boolean>(false)
   const [store, setStore] = useState<typeof data>(data)
 
-  const invokedChildren = useMemo(() => Children.toArray(
-    isFunction(children)
-      ? children({} as RenderProps<typeof store>).props.children
-      : children
-    ) as ReactElement[],
-    [children]
+  // We need that one to know how many children are in the component
+  // Children will be invoked again later with all the required parameters
+  const _childrenList = useMemo(() => Children.toArray(
+    isFunction(children) ? children({} as RenderProps<typeof store>).props.children : children
+    ) as ReactElement[], [children]
   )
 
   const ranges = useMemo(
     () =>
-      invokedChildren.reduce(
+        _childrenList.reduce(
         (acc: number[], { props }, i) => (
           acc.push(
             Children.toArray(props.children).length +
@@ -38,22 +37,22 @@ export function MergeSteps({
         ),
         []
       ),
-    [invokedChildren]
+    [_childrenList]
   )
 
   const stagesList = useMemo(
     () =>
-      invokedChildren.reduce(
+        _childrenList.reduce(
         (acc: number[][], _, i) => (
           acc.push([...Array(ranges[i] - (i > 0 ? ranges[i - 1] : 0)).keys()]),
           acc
         ),
         []
       ),
-    [invokedChildren, ranges]
+    [_childrenList, ranges]
   )
 
-  const changeStep = (index: number): void => {
+  const changeStep = useCallback((index: number) => {
     if (index === ranges[ranges.length - 1] && onSubmit) return onSubmit(store)
 
     const stage = ranges.findIndex((i) => i > index)
@@ -62,7 +61,19 @@ export function MergeSteps({
     setStage(stage)
     setStep(step)
     setItem(index)
-  }
+  }, [onSubmit, ranges, stagesList, store])
+
+  const invokedChildren = useMemo(() => Children.toArray(
+    isFunction(children)
+      ? children({
+          data: store,
+          setData: setStore,
+          setButtonsDisabled,
+          setPrevStep: (pages = 1) => changeStep(item - pages),
+          setNextStep: (pages = 1) => changeStep(item + pages)
+      } as RenderProps<typeof store>)
+      : children
+  ) as ReactElement[], [children, changeStep, item, store])
 
   return (
     <div className="merged-steps">
@@ -86,22 +97,18 @@ export function MergeSteps({
           ))
         }
       </div>
-      {cloneElement(invokedChildren[stage], {
-        children: invokedChildren[stage].props.children,
-        onSubmit,
+      {cloneElement(invokedChildren[0].props.children[stage], {
+        children: invokedChildren[0].props.children[stage].props.children,
         hasProgress: false,
         hasNavigation,
         primaryColor,
-        progressColor,
         navigationColor,
+        // Merged props
         item,
         mergedStep: step,
-        mergedStore: store,
-        mergedSetStore: setStore,
         mergedButtonsDisabled: buttonsDisabled,
-        mergedSetButtonsDisabled: setButtonsDisabled,
-        mergedSetPrevStep: () => changeStep(item - 1),
-        mergedSetNextStep: () => changeStep(item + 1)
+        mergedSetPrevStep: (pages = 1) => changeStep(item - pages),
+        mergedSetNextStep: (pages = 1) => changeStep(item + pages)
       } as StepsProps)}
     </div>
   )
